@@ -1,66 +1,99 @@
-#include <M5StickCPlus2.h>
+#include <Servo.h>
+#include <DHT.h>
 #include <Wire.h>
-#include <SPI.h>
-#include <ESP32Servo.h> // Use the ESP32-compatible Servo library
+#include <Adafruit_SSD1306.h>
+#include <TimeLib.h>
 
-#define SERVO_PIN 26 // Pino do Servo
+// Definições dos pinos
+#define SERVO_PIN 9
+#define RELAY_PIN 7
+#define DHT_PIN 2
+#define DHT_TYPE DHT11
+#define BUTTON_PIN 3
 
-Servo servo;
-int feedCount = 0; // Contador de alimentações
+// Inicializações
+Servo myServo;
+DHT dht(DHT_PIN, DHT_TYPE);
+Adafruit_SSD1306 display(128, 64, &Wire, -1);
+
+// Variáveis de contagem
+int feedCount = 0;
 unsigned long lastFeedTime = 0;
 unsigned long startTime = 0;
 
 void setup() {
-  M5.begin();
-  Wire.begin();
-  SPI.begin();
-  servo.attach(SERVO_PIN);
+  Serial.begin(9600);
+  myServo.attach(SERVO_PIN);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  dht.begin();
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;);
+  }
+  display.display();
+  delay(2000);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
 
-  M5.Lcd.clear();
-  M5.Lcd.println("Iniciado");
+  // Acionamento inicial do relé (luz do aquário)
+  digitalWrite(RELAY_PIN, LOW);
+  feedCount = 0;
 
-  startTime = millis(); // Registrar o tempo de início
+  // Inicializa o tempo
+  setTime(8, 0, 0, 1, 1, 2023);  // Defina a hora inicial (HH, MM, SS, DD, MM, YYYY)
+  startTime = now();  // Armazena o tempo inicial
 }
 
 void loop() {
-  // Calcular o tempo desde o início
-  unsigned long currentTime = millis();
-  unsigned long elapsedTime = currentTime - startTime;
+  unsigned long currentTime = now();
 
-  // Calcular horas, minutos e segundos desde o início
-  int hours = (elapsedTime / 3600000) % 24;
-  int minutes = (elapsedTime / 60000) % 60;
-  int seconds = (elapsedTime / 1000) % 60;
-
-  // Acionar o servo ao pressionar o botão A
-  if (M5.BtnA.wasPressed()) {
-    M5.Lcd.setCursor(0, 40);
-    M5.Lcd.println("Servo acionado");
-    servo.write(90); // Girar para 90 graus
-    delay(1000); // Esperar 1 segundo
-    servo.write(0); // Voltar à posição inicial
-
-    // Incrementar o contador de alimentações
-    feedCount++;
-    lastFeedTime = millis();
+  // Alimentação programada às 8h
+  if (hour() == 8 && minute() == 0 && second() < 10 && currentTime - lastFeedTime > 86400UL) {
+    feed();
   }
 
-  // Exibir a contagem de alimentações na tela
-  M5.Lcd.setCursor(0, 60);
-  M5.Lcd.printf("Alimentacoes hoje: %d", feedCount);
-
-  // Zerando a contagem de alimentações a cada 24 horas
-  if (hours == 0 && minutes == 0 && seconds < 10 && millis() - lastFeedTime > 10000) {
-    feedCount = 0;
-    M5.Lcd.setCursor(0, 80);
-    M5.Lcd.println("Contagem zerada");
+  // Alimentação por botão
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    feed();
+    delay(1000);  // Debounce do botão
   }
 
-  // Atualizar o display do M5StickCPlus2 com o horário desde o início
-  M5.Lcd.setCursor(0, 20);
-  M5.Lcd.printf("Tempo: %02d:%02d:%02d", hours, minutes, seconds);
+  // Controle das luzes do aquário
+  if (hour() >= 8 && hour() < 21) {
+    digitalWrite(RELAY_PIN, HIGH);
+  } else {
+    digitalWrite(RELAY_PIN, LOW);
+  }
 
-  // Atualizar o estado do botão
-  M5.update();
-  delay(100); // Pequeno atraso para evitar leitura múltipla do botão
+  // Leitura de temperatura e umidade
+  float humidity = dht.readHumidity();
+  float temperature = dht.readTemperature();
+
+  // Atualização do display OLED
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("Temp: ");
+  display.print(temperature);
+  display.print(" C");
+  display.setCursor(0, 10);
+  display.print("Hum: ");
+  display.print(humidity);
+  display.print(" %");
+  display.setCursor(0, 20);
+  display.print("Feeds: ");
+  display.print(feedCount);
+  display.display();
+
+  delay(2000);  // Atraso para evitar sobrecarga da tela
+}
+
+// Função de alimentação
+void feed() {
+  myServo.write(90);  // Girar para 90 graus
+  delay(1000);        // Esperar 1 segundo
+  myServo.write(0);   // Voltar à posição inicial
+  feedCount++;
+  lastFeedTime = now();
 }
