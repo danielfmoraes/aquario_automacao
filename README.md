@@ -24,4 +24,5 @@ Neste projeto está sendo considerado os seguintes sensores:
 |Button|Pin3
 
 
+![Texto Alternativo]([URL_da_Imagem](https://github.com/danielfmoraes/aquario_automacao/blob/estudo/7CCBCC91-4B92-432A-8861-06958141244B.jpg?raw=true))
 
