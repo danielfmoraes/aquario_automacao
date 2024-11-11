@@ -1,4 +1,4 @@
-# Automação em Aquario com Arduino
+# Autmoação em Aquario com Arduino
  Automação de alimentação e luzes do aquario com arduino.
 Neste projeto está sendo considerado os seguintes sensores:
 - Uno R3
@@ -6,6 +6,7 @@ Neste projeto está sendo considerado os seguintes sensores:
 - Relay SRD-05VDC-SL-C
 - Temp and Humidity DHT11
 - Tap module EC-3203
+- Display LCD OLED 12c
 
 ## Utilização
 
