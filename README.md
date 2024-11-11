@@ -5,11 +5,23 @@ Neste projeto está sendo considerado os seguintes sensores:
 - Micro Servo
 - Relay SRD-05VDC-SL-C
 - Temp and Humidity DHT11
-- Tap module EC-3203
+- Button
 - Display LCD OLED 12c
 
 ## Utilização
 
-- Com o micro servo realizar a alimentação todo dia com hora marcada e possibilidade com Tap de alimentação fora do horario
+- Com o micro servo realizar a alimentação todo dia com hora marcada e possibilidade com Button de alimentação fora do horario
 - Leitor de humidade e temperatura para compreensão do parametros ambientais
 - Utilização do Relay para acionamento e desligamento da luz do aquario
+- 
+## Esquema
+| Sensor | Data | SCL | SDA |
+| ------ | ------ | ------ | ------ |
+|Micro Servo| Pin 9|
+|Relay|Pin 7|
+|DHT Temperatura & Humidt|Pin2|
+|Display||A5|A4|
+|Button|Pin3
+
+
+
