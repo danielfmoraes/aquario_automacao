@@ -1,4 +1,4 @@
-#include <M5StickC.h>
+#include <M5StickCPlus2.h>
 #include <Wire.h>
 #include "RTClib.h"
 
