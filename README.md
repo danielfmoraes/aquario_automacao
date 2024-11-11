@@ -23,5 +23,7 @@ Neste projeto está sendo considerado os seguintes sensores:
 |Display||A5|A4|
 |Button|Pin3
 
+![Esquema do Proketo](https://github.com/danielfmoraes/aquario_automacao/blob/main/7CCBCC91-4B92-432A-8861-06958141244B.jpg?raw=true)
+
 
 
